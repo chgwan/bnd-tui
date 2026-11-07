@@ -1,7 +1,7 @@
 # bnd-tui 执行进度总结
 
 - **日期:** 2026-11-04
-- **状态:** M0–M2 代码全部完成(98/98 单测绿);真实账号已跑通登录、`ls`、上传、下载、任务控制、REPL,启动崩溃已由垫片绕开
+- **状态:** M0–M2 代码全部完成(99/99 单测绿);真实账号已跑通登录、`ls`、上传、下载、任务控制、REPL,启动崩溃已由垫片绕开
 - **计划:** `docs/superpowers/plans/2026-11-04-bnd-tui-mvp.md`
 - **设计:** `docs/superpowers/specs/2026-11-04-bnd-tui-design.md`
 
@@ -38,7 +38,7 @@
    - `ukFromBduss` 基于虚构格式,真实 BDUSS 上返回空串,已删除。官方 `uk/wdr/mdr` 来自 `/api/account/uinfo?udr=1`
 8. **STOKEN 取值时机**:进入 pan 前读到的可能是 passport 域的值,现改为访问 pan 后重读,并打印来源域
 
-9. **`set_login_state` 段错误**:内核剪贴板监控线程调用 `XOpenDisplay` 后不检查 NULL(`libbrowserengine.so` 偏移 `0x8e4a5d`),无 `DISPLAY` 时 `XInternAtom(NULL)` 崩溃。无桌面环境下现启动私有 Xvfb(`src/kernel/display.js`)
+9. **`set_login_state` 段错误**:内核剪贴板监控线程调用 `XOpenDisplay` 后不检查 NULL(`libbrowserengine.so` 偏移 `0x8e4a5d`),无 `DISPLAY` 时 `XInternAtom(NULL)` 崩溃。无桌面环境下优先启动私有 Xvfb(`src/kernel/display.js`);连 Xvfb 也没有时,垫片让剪贴板监控线程(`0x8e4a50`)直接返回 1、剪贴板读取函数(`0x8e4b30`,两个调用方都检查返回值)返回 0。实测无 X 下 `ls`、上传、下载、`rm`、`tasks`、扫码登录出码均正常,`ls` 连跑 20 次无崩溃
 10. **已登录后 `global_uninit` 段错误**:线程跳到未映射地址。现改走官方退出超时路径 `browser_engine_electron_begin_uninit` 后由进程退出收尾
 11. **Xvfb 生命周期**:退出时杀 Xvfb 会令 Xlib 在内核线程里调 `exit()` 而崩溃;`-terminate` 会被任何短连接(Chromium、内核自身)触发退出,内核随后拿到 NULL display;共用 display 号会让旧实例删掉新 socket。现由 `sh` 看门狗经 stdin 管道持有 Xvfb,bnd 退出后才杀,并按 PID 分配 display 号。Chromium 环境去掉 `DISPLAY`
 12. **缺 `set_config`**:官方在 `global_init` 后设置 `BEOPT_COMMONPARAM`,此前缺失导致请求的 `channel` 为空。已补上;`APP_VERSION` 为常量,升级 deb 后需同步
@@ -112,7 +112,7 @@
 ## 四、重要运维事实(排障时先看这里)
 
 - `netdisk_service` 为单例、**后启动者接管**;bnd 默认检测到官方 GUI 或父进程存活的服务会拒绝启动(`--coexist` 强制)
-- 无桌面环境需要 Xvfb;排查原生崩溃时 ptrace 不可用,可用 `LD_PRELOAD` 信号库抓 RIP 与内存映射
+- 无桌面环境不再需要 Xvfb;排查原生崩溃时 ptrace 不可用,可用 `LD_PRELOAD` 信号库抓 RIP 与内存映射
 - 孤儿 `netdisk_service`(PPID 为 1)不触发守卫
 - `npm install`(含 `--no-save`)**会修剪**此前 `--no-save` 装的包 —— 重装组件跑 `npm run install:full`
 - 官方 deb 升级后:重跑 `npm run glue` 重新生成内核绑定
@@ -171,7 +171,7 @@ BaiduPCS-Go 等第三方工具用自己的 app_id 走 web PCS API,服务端可�
 |---|---|---|
 | `tests/qrheadless.test.js` | 9 | 终端二维码渲染器(半块字符、scale 放大、白边、模块栅距检测)、安装形态决策 `chooseLoginMode` |
 | `tests/login-args.test.js` | 6 | `--bduss/--stoken` 参数解析、**completeLogin 官方序列(uinfo → report/user → set_login_state)及两类缺字段报错** |
-| `tests/kernel-env.test.js` | 6 | `COMMONPARAM` 形状、私有 Xvfb 看门狗与 display 号、缺 Xvfb 报错 |
+| `tests/kernel-env.test.js` | 7 | `COMMONPARAM` 形状、私有 Xvfb 看门狗与 display 号、缺 Xvfb 时不设 DISPLAY、Xvfb 异常退出报错 |
 | `tests/qr.test.js` | 8 | passport 轮询状态机、cookie JSON 逐字比对、凭证组装、表单编码、cookie 域优先级、Chromium 环境 |
 
 合计 85/85 通过(`node scripts/run-tests.js`)。这些用例使用模拟响应,不能替代真实扫码验证;此前的测试正是用虚构的 BDUSS 和签名返回值掩盖了第 7 条的问题。

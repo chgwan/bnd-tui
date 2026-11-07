@@ -58,9 +58,16 @@ test('displayNumberFor 不同 PID 得到不同 display 号,且避开常用低位
   assert.ok(displayNumberFor(0) >= 1000);
 });
 
-test('ensureDisplay 缺 Xvfb 时给出中文提示', async () => {
+test('ensureDisplay 缺 Xvfb 时不设 DISPLAY,交给垫片处理', async () => {
   const { spawnImpl } = fakeXvfb({ fail: 127 });
-  await assert.rejects(ensureDisplay({ env: {}, spawnImpl }), /Xvfb/);
+  const env = {};
+  await ensureDisplay({ env, spawnImpl });
+  assert.equal(env.DISPLAY, undefined);
+});
+
+test('ensureDisplay Xvfb 异常退出时报错', async () => {
+  const { spawnImpl } = fakeXvfb({ fail: 1 });
+  await assert.rejects(ensureDisplay({ env: {}, spawnImpl }), /Xvfb 异常退出/);
 });
 
 test('withShim 把垫片排在 LD_PRELOAD 最前', () => {

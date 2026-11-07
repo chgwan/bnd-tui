@@ -1,6 +1,7 @@
 // 内核的剪贴板监控线程在 set_login_state 后调用 XOpenDisplay,且不检查 NULL:
 // 无 DISPLAY 时 XInternAtom(NULL) 直接段错误。无桌面环境下给内核一个私有 Xvfb
-// (不借用用户的 VNC,以免内核监听真实剪贴板)。
+// (不借用用户的 VNC,以免内核监听真实剪贴板)。连 Xvfb 也没有时不设 DISPLAY,
+// 由垫片 native/bnd-shim.c 让剪贴板线程直接返回。
 //
 // Xvfb 的生命周期必须只绑定 bnd 进程,以下做法均实测崩溃:
 // - -terminate:任何短连接(Chromium、内核自身)断开都会让 Xvfb 退出,XOpenDisplay 随之失败
@@ -28,9 +29,9 @@ function readDisplayNumber(child, timeoutMs) {
       if (buf.includes('\n')) done(resolve, buf.trim());
     });
     child.on('error', (e) => done(reject, e));
-    child.on('exit', (code) => done(reject, new Error(
-      code === 127 ? '未找到 Xvfb:内核需要 X display。请安装 Xvfb,或设置 DISPLAY 后重试' : `Xvfb 异常退出(code ${code})`,
-    )));
+    child.on('exit', (code) => (code === 127
+      ? done(resolve, null)
+      : done(reject, new Error(`Xvfb 异常退出(code ${code})`))));
   });
 }
 
@@ -54,6 +55,7 @@ export async function ensureDisplay({ env = process.env, spawnImpl = spawn, time
     child.kill();
     throw e;
   }
+  if (number === null) return; // 没有 Xvfb
   env.DISPLAY = `:${number}`;
   child.removeAllListeners('exit');
   child.stdio[3].destroy?.();
