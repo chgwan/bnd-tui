@@ -1,0 +1,10 @@
+HOME=/tmp/bnd-hometest DISPLAY=<unset> workdir=/tmp/bnd-hometest
+version: 1.3.7.20
+ndevice name: <nic>
+global_init rc=0 in 0.06s
+events after 3s: 0
+[event id=58 extra=37] {"status":"0","text":"百度网盘"}
+global_uninit called, took 0.00s
+
+[exit-finished ok=True]
+EXPERIMENT DONE rc=0 init_time=0.06

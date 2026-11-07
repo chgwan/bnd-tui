@@ -1,0 +1,26 @@
+// 加载官方内核引擎 libbrowserengine.so(只读复用,永不修改)。
+import koffi from 'koffi';
+import { existsSync } from 'node:fs';
+import { homedir } from 'node:os';
+import path from 'node:path';
+
+export const OFFICIAL_DIR = path.join(homedir(), 'opt/baidunetdisk/opt/baidunetdisk');
+export const OFFICIAL_DEPS = path.join(homedir(), 'opt/baidunetdisk/deps/usr/lib64');
+export const DEFAULT_ENGINE_PATH = path.join(OFFICIAL_DIR, 'libbrowserengine.so');
+
+/**
+ * @param {{enginePath?: string}} opts
+ * @returns {{lib: object, api: {get_version(): string}}}
+ */
+export function loadEngine({ enginePath = DEFAULT_ENGINE_PATH } = {}) {
+  if (!existsSync(enginePath)) {
+    throw new Error(
+      `未找到内核引擎 ${enginePath}(libbrowserengine.so)——请确认官方客户端解包位置`,
+    );
+  }
+  const lib = koffi.load(enginePath);
+  const api = {
+    get_version: lib.func('browser_engine_get_version', 'string', []),
+  };
+  return { lib, api };
+}

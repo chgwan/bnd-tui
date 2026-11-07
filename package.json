@@ -1,0 +1,25 @@
+{
+  "name": "bnd-tui",
+  "version": "0.1.0",
+  "description": "Terminal Baidu Netdisk client driving the official kernel (libbrowserengine.so)",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "node scripts/run-tests.js",
+    "build": "node scripts/build-binary.mjs",
+    "build:shim": "node scripts/build-shim.mjs",
+    "glue": "node scripts/make-glue.mjs",
+    "install:full": "node scripts/install-full.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "koffi": "^3.3.6"
+  },
+  "bin": {
+    "bnd": "bin/bnd.js"
+  }
+}
