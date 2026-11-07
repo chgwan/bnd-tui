@@ -152,7 +152,7 @@ libbrowserengine.so(官方,只读复用)
      └─ 全部流量对百度而言与官方客户端不可区分
 ```
 
-登录数据流:终端扫码 → 浏览器 cookie 罐拿到 BDUSS/STOKEN → 内核请求 `uinfo`(uk/wdr/mdr)与 `report/user`(sign_key)→ 组装官方形状的 JSON 喂 `browser_engine_set_login_state` → 此后一切 API 调用都由内核完成。
+登录数据流:扫码登录 → 浏览器 cookie 罐拿到 BDUSS/STOKEN → 内核请求 `uinfo`(uk/wdr/mdr)与 `report/user`(sign_key)→ 组装官方形状的 JSON 喂 `browser_engine_set_login_state` → 此后一切 API 调用都由内核完成。
 
 ### 5.4 四条设计原则
 

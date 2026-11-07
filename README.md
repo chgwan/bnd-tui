@@ -28,7 +28,7 @@ bnd version        # 应输出 1.3.7.20
 
 - 前提:官方客户端解包在 `~/opt/baidunetdisk`;x86_64 Linux,glibc 2.28 及以上,系统有 `tar`
 - 首次运行解压约 24MB 到 `~/.cache/bnd-tui`
-- 引导登录(`--bduss`/`--stoken`)开箱即用。终端扫码还需要 Chromium,装一次即可:`npx playwright@1.64.1 install chromium`
+- 引导登录(`--bduss`/`--stoken`)开箱即用。扫码登录还需要 Chromium,装一次即可:`npx playwright@1.64.1 install chromium`
 
 ## 从源码安装
 
@@ -40,7 +40,7 @@ cd ~/Codes/bnd-tui
 npm install
 node bin/bnd.js version        # 应输出 1.3.7.20
 
-# full 安装(追加 playwright + Chromium,约 400MB):启用终端扫码登录
+# full 安装(追加 playwright + Chromium,约 400MB):启用扫码登录
 npm run install:full
 ```
 
@@ -78,7 +78,7 @@ node bin/bnd.js                                            # 进入交互 shell
 node bin/bnd.js logout
 ```
 
-### 方式一:终端扫码(full 安装)
+### 方式一:扫码登录(full 安装)
 
 ```bash
 node bin/bnd.js login
