@@ -14,7 +14,23 @@
 - 无 GUI、无显示服务器、无 root;内核 init 实测 60ms
 - 单发命令与交互 shell(REPL)双模式
 
-## 安装
+## 下载二进制(推荐)
+
+从 [Releases](https://github.com/chgwan/bnd-tui/releases/latest) 下载单文件可执行 `bnd`,不需要 Node,也不需要克隆本仓库:
+
+```bash
+mkdir -p ~/.local/bin
+gh release download --repo chgwan/bnd-tui --pattern 'bnd*' --dir /tmp/bnd-dl
+cd /tmp/bnd-dl && sha256sum -c bnd.sha256 && install -m 755 bnd ~/.local/bin/bnd
+bnd version        # 应输出 1.3.7.20
+```
+
+- 仓库是私有的,下载需要已登录且有权限的 `gh`
+- 前提:官方客户端解包在 `~/opt/baidunetdisk`;x86_64 Linux,glibc 2.28 及以上,系统有 `tar`
+- 首次运行解压约 24MB 到 `~/.cache/bnd-tui`
+- 引导登录(`--bduss`/`--stoken`)开箱即用。终端扫码还需要 Chromium,装一次即可:`npx playwright@1.64.1 install chromium`
+
+## 从源码安装
 
 两种安装形态,按需选择:
 
