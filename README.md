@@ -26,8 +26,10 @@ sha256sum -c bnd.sha256 && install -m 755 bnd ~/.local/bin/bnd
 bnd version        # 应输出 1.3.7.20
 ```
 
-- 前提:官方客户端解包在 `~/opt/baidunetdisk`;x86_64 Linux,glibc 2.28 及以上,系统有 `tar`。不需要 X 或 Xvfb
-- 首次运行解压约 24MB 到 `~/.cache/bnd-tui`
+- 不需要安装官方客户端:二进制里已附带内核运行所需的官方文件(约 94MB)
+- 不需要 X 或 Xvfb,也不需要 root
+- 前提:x86_64 Linux,glibc 2.28 及以上,系统有 `tar`。内核还用到系统的 GTK2、X11、cairo、pango、dbus 等运行库,常见发行版和 HPC 登录节点一般自带
+- 首次运行解压约 118MB 到 `~/.cache/bnd-tui`
 - 引导登录(`--bduss`/`--stoken`)开箱即用。扫码登录还需要 Chromium,装一次即可:`npx playwright@1.64.1 install chromium`
 
 ## 从源码安装
@@ -47,19 +49,20 @@ npm run install:full
 - 组件以 `--no-save` 方式追加,不改动 package.json;重新 `npm install` 后若扫码失效,再跑一次 `npm run install:full`
 - Chromium 由 playwright 下载到 `~/.cache/ms-playwright`,启动时自动复用官方客户端 deps 目录里的运行库
 
-前提:官方客户端解包在 `~/opt/baidunetdisk`(只读复用,永不修改)。
+前提:官方客户端解包在 `~/opt/baidunetdisk`(只读复用,永不修改)。放在别处时用环境变量 `BND_OFFICIAL_ROOT` 指定解包目录。
 
 ### 单文件可执行
 
 ```bash
-npm run build     # 生成 dist/bnd(约 122MB,内含 Node 运行时和全部 JS 依赖)
+npm run build     # 生成 dist/bnd(约 159MB,内含 Node 运行时、全部 JS 依赖和官方内核文件)
 dist/bnd ls /
 ```
 
-- 不需要安装 Node,首次运行解压约 24MB 到 `~/.cache/bnd-tui`
+- 不需要安装 Node 和官方客户端,首次运行解压约 118MB 到 `~/.cache/bnd-tui`
+- 构建时从 `~/opt/baidunetdisk`(或 `BND_OFFICIAL_ROOT`)拷入官方内核文件,只拷运行用到的 10 个文件和 `deps/usr/lib64`,不拷 GUI 和 asar
 - 构建需要 `gcc`,用于编译内核垫片 `native/bnd-shim.so`。从源码运行时先执行 `npm run build:shim`,否则启动有约 3% 概率崩溃
 - 构建时会把当前 `node_modules` 打进去,要扫码登录需先跑 `npm run install:full`
-- 官方客户端、playwright 的 Chromium 仍是外部依赖,不打包;Xvfb 可选,没有 X 也能运行;目标机需要 glibc 2.28 及以上和系统 `tar`
+- playwright 的 Chromium 仍是外部依赖,不打包;Xvfb 可选,没有 X 也能运行;目标机需要 glibc 2.28 及以上和系统 `tar`
 
 ## 使用
 
@@ -115,4 +118,4 @@ node bin/bnd.js ls / --coexist
 - `src/shell/` — REPL、注册表、各命令
 - `scripts/make-glue.mjs` — 从官方 asar 重新生成 `glue.gen.js`
 - `docs/recon/` — 逆向侦察存档(导出表、签名、实验记录)
-- `tests/` — `node scripts/run-tests.js`(99 个用例)
+- `tests/` — `node scripts/run-tests.js`(102 个用例)

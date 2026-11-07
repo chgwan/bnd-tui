@@ -1,6 +1,6 @@
 {
   "name": "bnd-tui",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Terminal Baidu Netdisk client driving the official kernel (libbrowserengine.so)",
   "directories": {
     "doc": "docs"

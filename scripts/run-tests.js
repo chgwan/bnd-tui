@@ -2,8 +2,8 @@
 // 测试运行引导:确保 LD_LIBRARY_PATH 在进程启动前就包含官方 deps 目录,
 // 否则 libbrowserengine.so 的 NEEDED 库(gtkmm 等)解析失败。
 import { spawn } from 'node:child_process';
+import { OFFICIAL_DEPS as DEPS } from '../src/kernel/official.js';
 
-const DEPS = `${process.env.HOME}/opt/baidunetdisk/deps/usr/lib64`;
 const hasDeps = (process.env.LD_LIBRARY_PATH || '').split(':').includes(DEPS);
 
 if (hasDeps) {

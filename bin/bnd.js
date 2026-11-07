@@ -5,8 +5,8 @@ import { spawn } from 'node:child_process';
 import { isSea } from 'node:sea';
 import { fileURLToPath } from 'node:url';
 import { withShim } from '../src/kernel/shim.js';
+import { OFFICIAL_DEPS as DEPS } from '../src/kernel/official.js';
 
-const DEPS = `${process.env.HOME}/opt/baidunetdisk/deps/usr/lib64`;
 const depsReady = (process.env.LD_LIBRARY_PATH || '').split(':').includes(DEPS);
 
 // 内核原生崩溃时由这个父进程报告;不转发信号,否则 shell 会打印 core dumped

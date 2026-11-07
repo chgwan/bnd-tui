@@ -1,7 +1,7 @@
 # bnd-tui 执行进度总结
 
 - **日期:** 2026-11-04
-- **状态:** M0–M2 代码全部完成(99/99 单测绿);真实账号已跑通登录、`ls`、上传、下载、任务控制、REPL,启动崩溃已由垫片绕开
+- **状态:** M0–M2 代码全部完成(102/102 单测绿);真实账号已跑通登录、`ls`、上传、下载、任务控制、REPL,启动崩溃已由垫片绕开
 - **计划:** `docs/superpowers/plans/2026-11-04-bnd-tui-mvp.md`
 - **设计:** `docs/superpowers/specs/2026-11-04-bnd-tui-design.md`
 
@@ -99,6 +99,15 @@
 ## 单文件可执行
 
 `npm run build` 用 Node SEA 生成 `dist/bnd`,首次运行把应用解压到 `~/.cache/bnd-tui`。已实测 `version`、`whoami`、`ls`、`tasks`、REPL、二维码显示和并发首次运行。
+
+## 附带官方内核
+
+- **做法:** `npm run build` 把运行用到的官方文件拷进二进制,运行时按 `BND_OFFICIAL_ROOT` → 附带的 `official/` → `~/opt/baidunetdisk` 的顺序找(`src/kernel/official.js`)
+- **文件清单:** `libbnusdk.so`、`libbrowserengine.so`、`libkernel.so`、`libminosagent.so`、`libplayer.so`、`netdisk_service`、`resources/` 下的 `cacert.pem`、`default.db`、`resource.db`、`version`,以及 `deps/usr/lib64`,共约 94MB
+- **怎么定的:** ptrace 不可用,用 inotify 监视官方目录,跑 `ls`、上传、下载、`rm`、`tasks`、扫码登录出码。三个 asar 虽被打开,去掉后上述操作照常;改用精简目录后官方目录下没有任何文件被打开,`netdisk_service` 也从精简目录启动
+- **实测:** 假 HOME(没有 `~/opt`)、无 X、无 `LD_LIBRARY_PATH` 下,`dist/bnd` 的 `ls`、4MB 上传下载逐字节一致、`rm` 均正常
+- **仍依赖系统库:** GTK2、X11 系列、cairo、pango、dbus 等;目标机缺库时内核加载会报出缺的库名
+- **版权:** 这些是百度的闭源文件。按用户决定随公开 release 分发,收到下架通知再撤
 
 ## 三、接下来的事
 
